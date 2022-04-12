@@ -1,2 +1,4 @@
 (test
- (name qual_project))
+ (name qual_project)
+ (preprocess (pps ppx_inline_test ppx_deriving.std))
+ (libraries lib))
