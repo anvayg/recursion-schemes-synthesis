@@ -1,0 +1,1 @@
+(* Try to figure out how to use Alcotest here; inline tests seem to only work in a library *)

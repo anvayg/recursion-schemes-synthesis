@@ -2,14 +2,16 @@
 (* Open questions:
     1. How to implement a generic catamorphism module? 
       This module should ideally take a datatype, and return a catamorphism over it of the kind below.
-    2. How to use deriving?
+*)
+
+(* TODO: redefine these catamorphisms in terms of 
 *)
 
 
 (* Experimenting with some basic catamorphisms *)
 
 type nat = 
-  | Zero 
+  | Zero
   | Succ of nat
 [@@deriving show]
 
