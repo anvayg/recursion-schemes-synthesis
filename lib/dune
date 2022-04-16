@@ -1,4 +1,9 @@
+(menhir (modules parser))
+
+(ocamllex lexer)
+
 (library
  (name lib)
  (inline_tests)
- (preprocess (pps ppx_inline_test ppx_deriving.std)))
+ (libraries core)
+ (preprocess (pps ppx_inline_test ppx_deriving.std ppx_hash)))
