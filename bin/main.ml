@@ -38,7 +38,7 @@ let main () =
       if Sys.file_exists f then
         begin match !mode with
         | Parse -> 
-            let _ = Parsercontainer.parse_file f in Printf.printf "Going to parser!"
+            let prog = Parsercontainer.parse_file f in Printf.printf "%s\n" (Pp.pp_prog prog)
         | Default -> ignore f
         end
       else 
