@@ -94,3 +94,5 @@ type world = env * value
 
 type prog = decl list * synth_problem
 
+exception Internal_error of string
+let internal_error f s = raise @@ Internal_error (sprintf "(%s) %s" f s)
