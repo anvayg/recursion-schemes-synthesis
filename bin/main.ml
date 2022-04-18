@@ -5,6 +5,7 @@ exception Arg_exception
 type driver_mode =
   | Default
   | Parse
+  | Type
 
 let usage_msg = "main [-help | opts...] <src>"
 let filename : string option ref = ref None
@@ -19,6 +20,10 @@ let args =
   [("-parse"
     , Arg.Unit (fun _ -> set_opt Parse)
     , " Parse only"
+    )
+  ; ("-type"
+    , Arg.Unit (fun _ -> set_opt Type)
+    , "Morphism type"
     )
   ] 
   |> Arg.align
@@ -39,6 +44,9 @@ let main () =
         begin match !mode with
         | Parse -> 
             let prog = Parsercontainer.parse_file f in Printf.printf "%s\n" (Pp.pp_prog prog)
+        | Type -> 
+            f |> Parsercontainer.parse_file 
+              |> Typeinference.inspect_spec
         | Default -> ignore f
         end
       else 

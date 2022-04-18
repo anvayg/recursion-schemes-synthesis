@@ -4,7 +4,7 @@
       This module should ideally take a datatype, and return a catamorphism over it of the kind below.
 *)
 
-(* TODO: redefine these catamorphisms in terms of 
+(* TODO: redefine these catamorphisms in terms of the language in Lang.ml
 *)
 
 
