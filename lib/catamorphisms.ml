@@ -15,6 +15,13 @@ type nat =
   | Succ of nat
 [@@deriving show]
 
+let rec nat_to_int (n : nat) : int =
+  match n with
+  | Zero -> 0
+  | Succ n' -> 1 + (nat_to_int n')
+
+let compare_nat n1 n2 = compare (nat_to_int n1) (nat_to_int n2)
+
 let rec cataNat (n : nat) (zero_case : 'a) (succ_case : 'a -> 'a) : 'a =
   match n with
   | Zero -> zero_case
