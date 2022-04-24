@@ -14,8 +14,6 @@ let simple_succ_func = DLet ("simple_succ_func", false, [("n", TBase "nat")], (T
 
 
 (* Specification for a list to nat catamorphism *)
-type operator = string
-
 type equation = exp * exp (* invariant: 1st proj is LHS, 2nd proj is RHS *)
 
 module NatList = 
@@ -52,10 +50,10 @@ module NatListCataSpec = CataSpecMap(NatListMap) *)
 
 
 (* Create constraints from cata_spec *)
-let create_values_map (io : exp list) = 
+let create_values_map (io : (exp * exp) list) = 
   let values_map = NatListMap.empty in
-  List.fold_left 
-    (fun m exp -> m (* TODO *)
+  List.fold_left
+    (fun m _ -> m (* TODO *)
     ) 
     values_map
     io

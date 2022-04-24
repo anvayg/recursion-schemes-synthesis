@@ -2,6 +2,8 @@ open Lang
 
 (** Look at input-output types to construct the right catamorphism **)
 
+type morphism_type = ListToNat
+
 let check_types (t : typ) (io_examples : exp list) =
   let check_io_types (io_examples : exp list) =
     match io_examples with
@@ -25,8 +27,7 @@ let check_types (t : typ) (io_examples : exp list) =
     | TBase x1, TBase x2 -> 
         Printf.printf "%s, %s\n" x1 x2;
         if x1 = "list" && x2 = "nat" then
-          check_io_types io_examples
-          (* create_values_map io_examples) *)
+          (check_io_types io_examples; ListToNat)
         else
           internal_error "Currently unsupported" ""
     | _, _ -> internal_error "Currently unsupported" ""
