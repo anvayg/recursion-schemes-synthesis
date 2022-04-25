@@ -2,7 +2,7 @@ open Lang
 
 (** Look at input-output types to construct the right catamorphism **)
 
-type morphism_type = ListToNat
+type morphism_type = ListToNat | Unknown
 
 let check_types (t : typ) (io_examples : exp list) =
   let check_io_types (io_examples : exp list) =

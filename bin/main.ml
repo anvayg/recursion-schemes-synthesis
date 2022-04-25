@@ -61,6 +61,7 @@ let main () =
             | Lang.EPFun l -> ignore (Equations.create_values_map l)
             | _ -> Printf.printf "Should be unreachable\n"
             end
+          | Unknown -> Printf.printf "Not implemented\n"
           )
         | Default -> ignore f (* TODO: change later *)
         end

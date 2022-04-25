@@ -1,7 +1,6 @@
 open Lang
 open Catamorphisms
-
-(* Write catamorphisms using lang.ml *)
+open Typeinference
 
 (* Simple functions *)
 
@@ -17,14 +16,16 @@ let simple_succ_func = DLet ("simple_succ_func", false, [("n", TBase "nat")], (T
 type expr = 
 | EOp of id
 | EApp of expr * expr
+| ETuple of expr list
 | EVal of vexpr
 
 and vexpr =
-| EList of nat list
-| ENat of nat
+| VList of nat list
+| VNat of nat
 
 type equation = expr * expr (* invariant: 1st proj is LHS, 2nd proj is RHS *)
 
+(* TODO: write pp for expr, based on pp.ml *)
 
 module NatList = 
   struct
@@ -70,4 +71,22 @@ let create_values_map (io : (exp * exp) list) =
     values_map
     io
 
-let saturate_io_examples (io : equation list) = ignore io
+let construct_equations (values_map : nat NatListMap.t) (equation_type : morphism_type) : equation list =
+  let mk_equation (key : nat list) (value : nat) (fn_string : string) (op_string : string) : equation =
+    let lhs = EApp (EOp fn_string, EVal (VList key)) in
+    match key with
+    | [] -> let rhs = EVal (VNat value) in
+            (lhs, rhs)
+    | hd :: tl -> let rhs = EApp (EOp op_string, ETuple [EVal (VNat hd); EVal (VList tl)]) in
+            (lhs, rhs)
+    in
+  match equation_type with
+  | ListToNat -> 
+    let fn_string = "f" in
+    let op_string = "plus" in
+    NatListMap.fold (fun k v l -> (mk_equation k v fn_string op_string) :: l) values_map []
+
+  | Unknown -> internal_error "Currently unsupported" ""
+
+
+let saturate_equations = ()
