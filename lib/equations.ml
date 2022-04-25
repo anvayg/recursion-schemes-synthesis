@@ -56,6 +56,34 @@ let prec_of_expr (e : expr) : int =
 
 let prec_of_vexpr : int = 600
 
+(* Shadows function in pp.ml *)
+let fpf_nat ppf (n : nat) =
+  let rec count n e =
+    match e with
+    | Zero -> fpf ppf "%d" n
+    | Succ e' -> count (1 + n) e'
+    in
+  count 0 n
+
+let fpf_nat_literal ppf (e : vexpr) =
+  match e with
+  | VNat e' -> fpf_nat ppf e'
+  | VList _ -> internal_error "Trying to print non-nat literal" ""
+
+let fpf_natlist_literal ppf (e: vexpr) =
+  let rec fpf_elems ppf e = 
+    match e with
+    | [] -> ()
+    | hd :: tl -> fpf_nat ppf hd;
+                  fpf_elems ppf tl
+  in
+  fpf ppf "[";
+  match e with
+  | VList l -> 
+    fpf_elems ppf l;
+    fpf ppf "]"
+  | VNat _ -> internal_error "Trying to print non-natlist literal" ""
+
 let rec fpf_expr ppf ((lvl, e) : int * expr) =
   let this_lvl = prec_of_expr e in
     (if this_lvl < lvl then fpf ppf "(");
