@@ -1,6 +1,8 @@
 open Lang
 open Catamorphisms
 open Typeinference
+(* open Format *)
+open Pp
 
 (* Simple functions *)
 
@@ -12,20 +14,6 @@ let simple_succ_func = DLet ("simple_succ_func", false, [("n", TBase "nat")], (T
 
 
 (* Create constraints for a list to nat catamorphism *)
-
-type expr = 
-| EOp of id
-| EApp of expr * expr
-| ETuple of expr list
-| EVal of vexpr
-
-and vexpr =
-| VList of nat list
-| VNat of nat
-
-type equation = expr * expr (* invariant: 1st proj is LHS, 2nd proj is RHS *)
-
-(* TODO: write pp for expr, based on pp.ml *)
 
 module NatList = 
   struct
@@ -41,10 +29,50 @@ module NatList =
         | -1 -> -1 
         | _ -> compare t tt
       end
-
     end
 
 module NatListMap = Map.Make(NatList)
+
+type expr = 
+| EOp of id
+| EApp of expr * expr
+| ETuple of expr list
+| EVal of vexpr
+
+and vexpr =
+| VList of nat list
+| VNat of nat
+[@@deriving ord, show]
+
+type equation = expr * expr (* invariant: 1st proj is LHS, 2nd proj is RHS *)
+
+(* TODO: write pp for expr, based on pp.ml *)
+let prec_of_expr (e : expr) : int =
+  match e with
+  | EOp _ -> 1000
+  | EApp _ -> 500
+  | ETuple _ -> 700
+  | EVal _ -> 1000
+
+let prec_of_vexpr : int = 600
+
+let rec fpf_expr ppf ((lvl, e) : int * expr) =
+  let this_lvl = prec_of_expr e in
+    (if this_lvl < lvl then fpf ppf "(");
+  match e with
+  | EOp x -> fpf ppf "%a" ident x
+  | EApp (e1, e2) -> 
+    fpf ppf "@[<2>%a@ %a@]"
+          fpf_expr (this_lvl, e1) fpf_expr (this_lvl + 1, e2)
+  | ETuple _ -> ()
+  | EVal _ -> ()
+
+and fpf_vexpr ppf ((lvl, v) : int * vexpr) =
+    let this_lvl = prec_of_vexpr in
+    (if this_lvl < lvl then fpf ppf "(");
+    match v with
+    | VList _ -> ()
+    | VNat _ -> ()
 
 (* Convert ECtor nat to Nat *)
 let rec cvt_ctor_to_nat (e : exp) : nat =
@@ -88,5 +116,20 @@ let construct_equations (values_map : nat NatListMap.t) (equation_type : morphis
 
   | Unknown -> internal_error "Currently unsupported" ""
 
-
-let saturate_equations = ()
+let saturate_equations (values_map : nat NatListMap.t) (equations : equation list) : equation list = 
+  let rec saturate (e : expr) =
+    match e with
+    | EOp _ -> e
+    | EApp (e1, e2) -> EApp (saturate e1, saturate e2)
+    | ETuple l -> ETuple (List.map saturate l)
+    | EVal v -> 
+      begin match v with
+      | VNat _ -> EVal v
+      | VList l -> 
+        (match NatListMap.find_opt l values_map with
+        | Some n -> EVal (VNat n)
+        | None -> EVal (VList l)
+        )
+    end
+  in
+  List.map (fun (lhs, rhs) -> (saturate lhs, saturate rhs)) equations
