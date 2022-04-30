@@ -61,7 +61,10 @@ let main () =
             | Lang.EPFun l -> 
               let v_map =  Equations.create_values_map l in
               let equations = Equations.construct_equations v_map ListToNat in
-              List.iter (fun e -> Printf.printf "%s\n" (Equations.fpf_equation e)) equations
+              List.iter (fun e -> Printf.printf "%s\n" (Equations.fpf_equation e)) equations;
+              print_newline();
+              let sat_equations = Equations.saturate_equations v_map equations in
+              List.iter (fun e -> Printf.printf "%s\n" (Equations.fpf_equation e)) sat_equations
             | _ -> Printf.printf "Should be unreachable\n"
             end
           | Unknown -> Printf.printf "Not implemented\n"
@@ -71,4 +74,4 @@ let main () =
       else 
         Arg.usage args ("File not found: " ^ f)
 
-let () = print_endline "Hello, World!"; main ()
+let () = main ()
