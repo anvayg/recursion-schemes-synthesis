@@ -58,7 +58,10 @@ let main () =
             let _, synth_prob = prog in
             let (_, _, io_examples) = synth_prob in
             begin match List.hd io_examples with
-            | Lang.EPFun l -> ignore (Equations.create_values_map l)
+            | Lang.EPFun l -> 
+              let v_map =  Equations.create_values_map l in
+              let equations = Equations.construct_equations v_map ListToNat in
+              List.iter (fun e -> Printf.printf "%s\n" (Equations.fpf_equation e)) equations
             | _ -> Printf.printf "Should be unreachable\n"
             end
           | Unknown -> Printf.printf "Not implemented\n"

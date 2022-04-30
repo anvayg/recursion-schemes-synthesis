@@ -1,7 +1,7 @@
 open Lang
 open Catamorphisms
 open Typeinference
-(* open Format *)
+open Format
 open Pp
 
 (* Simple functions *)
@@ -74,7 +74,9 @@ let fpf_natlist_literal ppf (e: vexpr) =
   let rec fpf_elems ppf e = 
     match e with
     | [] -> ()
-    | hd :: tl -> fpf_nat ppf hd;
+    | [hd] -> fpf_nat ppf hd
+    | hd :: tl -> fpf_nat ppf hd; 
+                  fpf ppf ";";
                   fpf_elems ppf tl
   in
   fpf ppf "[";
@@ -87,20 +89,38 @@ let fpf_natlist_literal ppf (e: vexpr) =
 let rec fpf_expr ppf ((lvl, e) : int * expr) =
   let this_lvl = prec_of_expr e in
     (if this_lvl < lvl then fpf ppf "(");
-  match e with
+  begin match e with
   | EOp x -> fpf ppf "%a" ident x
   | EApp (e1, e2) -> 
     fpf ppf "@[<2>%a@ %a@]"
           fpf_expr (this_lvl, e1) fpf_expr (this_lvl + 1, e2)
-  | ETuple _ -> ()
-  | EVal _ -> ()
+  | ETuple es -> fpf ppf "@[<2>(%a)@]" fpf_expr_list es
+  | EVal v -> fpf_vexpr ppf (this_lvl, v)
+  end;
+  (if this_lvl < lvl then fpf ppf ")")
+
+and fpf_expr_list ppf (es : expr list) =
+  match es with
+  | []    -> ()
+  | [e]   -> fpf ppf "%a" fpf_expr (0, e)
+  | e::es -> fpf ppf "%a,@ %a" fpf_expr (0, e) fpf_expr_list es
 
 and fpf_vexpr ppf ((lvl, v) : int * vexpr) =
     let this_lvl = prec_of_vexpr in
     (if this_lvl < lvl then fpf ppf "(");
-    match v with
-    | VList _ -> ()
-    | VNat _ -> ()
+    begin match v with
+    | VList _ -> fpf_natlist_literal ppf v
+    | VNat _ -> fpf_nat_literal ppf v
+    end;
+    (if this_lvl < lvl then fpf ppf ")")
+
+let fpf_equation (eq : equation) =
+  let lhs, rhs = eq in
+  fpf_expr str_formatter (0, lhs); 
+  fpf str_formatter " = ";
+  fpf_expr str_formatter (0, rhs);
+  flush_str_formatter ()
+
 
 (* Convert ECtor nat to Nat *)
 let rec cvt_ctor_to_nat (e : exp) : nat =
